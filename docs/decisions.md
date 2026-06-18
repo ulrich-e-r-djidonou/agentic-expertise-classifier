@@ -1,45 +1,71 @@
 # Decisions
 
-## D001: Eight behavioral questions
+## D001: Conversation evidence instead of a questionnaire
 
 Status: accepted
 
-Use eight questions, split evenly between:
+The product will not ask users to self-report behavior through multiple-choice questions. The skill will evaluate behavior already observed in the current conversation.
 
-1. Request framing: vocabulary, constraints, tradeoffs, and verification.
-2. Conversation behavior: error detection, correction quality, prompt evolution, and autonomy calibration.
+Rationale: Anthropic's classifier reads complete session transcripts. A questionnaire would measure self-perception rather than demonstrated expertise.
 
-Rationale: eight questions provide enough behavioral coverage while keeping completion time short.
-
-## D002: Scoring model
+## D002: Anthropic classification model
 
 Status: accepted
 
-Each answer maps to a score from 1 to 5. The final score is the arithmetic mean of all answers, rounded to one decimal place.
+Use one holistic best-fit verdict for the specific task:
 
-Level boundaries:
+- 1 - Novice
+- 2 - Beginner
+- 3 - Intermediate
+- 4 - Advanced
+- 5 - Expert
+- Unclear
 
-- 1.0 to 1.8: Novice
-- 1.9 to 2.6: Advanced Beginner
-- 2.7 to 3.4: Competent
-- 3.5 to 4.2: Proficient
-- 4.3 to 5.0: Expert
+Do not calculate averages or weighted sub-scores. Anthropic describes three co-equal signals that must be considered together.
 
-The result will also show separate averages for the two dimensions. This prevents a single overall label from hiding an important imbalance.
-
-## D003: Result guidance
+## D003: Evidence and result
 
 Status: accepted
 
-Each level returns:
+Each evaluation returns:
 
-- a concise behavioral description,
-- one concrete implication for future use of agentic tools,
-- the two dimension scores.
+- the specific task and domain assessed,
+- one Anthropic-aligned verdict,
+- concrete evidence from the conversation,
+- contrary or limiting evidence,
+- evidence sufficiency,
+- one practical next step.
 
 ## D004: Visual direction
 
 Status: accepted
 
-Use a dark editorial interface with warm off-white text and a restrained acid-green accent. The layout will avoid decorative dashboard chrome and prioritize typography, progress, answer selection, and a screenshot-ready result.
+Use a dark editorial interface with warm off-white text and a restrained acid-green accent. The page explains the skill, method, levels, example output, and installation without presenting an interactive questionnaire.
 
+## D005: Anthropic research basis
+
+Status: accepted
+
+The assessment is adapted from Anthropic's June 16, 2026 report, [Agentic coding and persistent returns to expertise](https://www.anthropic.com/research/claude-code-expertise).
+
+The report's classifier uses three principal signals:
+
+1. precision in how the user frames directions,
+2. what the user asks Claude to verify,
+3. whether the user corrects Claude or Claude corrects the user.
+
+This skill applies those transcript-level observations directly to the current conversation. It must be described as an independent adaptation, not as an official or validated Anthropic assessment.
+
+## D006: Current session versus memory
+
+Status: accepted
+
+The primary verdict uses only the current conversation, consistent with Anthropic's session-level construct.
+
+If memory or prior-session evidence is accessible, it can appear only as a separately labeled historical context section. It cannot modify the primary verdict.
+
+## D007: Domain specificity
+
+Status: accepted
+
+Classify expertise for the task at hand, not for the person globally. If multiple domains are present, classify them separately only when each has sufficient evidence.

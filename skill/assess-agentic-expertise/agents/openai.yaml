@@ -1,0 +1,4 @@
+interface:
+  display_name: "Assess Agentic Expertise"
+  short_description: "Classify task expertise from conversation evidence"
+  default_prompt: "Use $assess-agentic-expertise to classify my task-specific expertise from this conversation."

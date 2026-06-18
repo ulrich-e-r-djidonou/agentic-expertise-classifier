@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a0c0b">
+  <meta name="description" content="An Anthropic-aligned skill that assesses task-specific expertise from an agentic coding conversation.">
+  <title>Assess Agentic Expertise</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0c0b;
+      --surface: #121512;
+      --surface-2: #181c18;
+      --text: #f0efe8;
+      --muted: #9aa099;
+      --faint: #5d635d;
+      --line: #2b302b;
+      --accent: #c7f36c;
+      --accent-ink: #182008;
+      --max: 1120px;
+      --font: "Aptos", "Segoe UI Variable", "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 78% 4%, rgba(199, 243, 108, 0.08), transparent 30rem),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    button:focus-visible,
+    a:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    .wrap {
+      width: min(calc(100% - 40px), var(--max));
+      margin: 0 auto;
+    }
+
+    .nav {
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      font-size: 0.76rem;
+      font-weight: 760;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .hero {
+      min-height: calc(100vh - 80px);
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(330px, 0.7fr);
+      gap: clamp(48px, 8vw, 120px);
+      align-items: center;
+      padding: 80px 0;
+    }
+
+    .eyebrow {
+      margin: 0 0 20px;
+      color: var(--accent);
+      font-size: 0.76rem;
+      font-weight: 760;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      max-width: 780px;
+      margin-bottom: 28px;
+      font-size: clamp(3.3rem, 8.5vw, 7.2rem);
+      font-weight: 640;
+      letter-spacing: -0.065em;
+      line-height: 0.91;
+    }
+
+    .hero-copy {
+      max-width: 650px;
+      margin-bottom: 34px;
+      color: #c1c5bf;
+      font-size: clamp(1rem, 2vw, 1.18rem);
+      line-height: 1.65;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .button {
+      min-height: 50px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 22px;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 720;
+      text-decoration: none;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--accent-ink);
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      border-color: var(--muted);
+    }
+
+    .button.primary:hover {
+      border-color: #d6ff83;
+      background: #d6ff83;
+    }
+
+    .prompt-panel {
+      position: relative;
+      border: 1px solid #343a34;
+      border-radius: 18px;
+      padding: 28px;
+      background: rgba(18, 21, 18, 0.86);
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.22);
+    }
+
+    .panel-label {
+      margin-bottom: 22px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 720;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .prompt {
+      margin-bottom: 26px;
+      color: var(--text);
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: 1rem;
+      line-height: 1.65;
+    }
+
+    .copy-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .copy-button {
+      border: 0;
+      padding: 0;
+      background: transparent;
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 720;
+    }
+
+    .copy-status {
+      min-height: 18px;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .section {
+      padding: 110px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .section-head {
+      max-width: 720px;
+      margin-bottom: 58px;
+    }
+
+    h2 {
+      margin-bottom: 18px;
+      font-size: clamp(2.25rem, 5vw, 4.4rem);
+      font-weight: 620;
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+
+    .section-intro {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.65;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+
+    .step {
+      min-height: 270px;
+      padding: 30px;
+      background: var(--bg);
+    }
+
+    .step-number {
+      display: block;
+      margin-bottom: 52px;
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 760;
+      letter-spacing: 0.1em;
+    }
+
+    .step h3 {
+      margin-bottom: 14px;
+      font-size: 1.35rem;
+      font-weight: 610;
+      letter-spacing: -0.02em;
+    }
+
+    .step p {
+      margin-bottom: 0;
+      color: var(--muted);
+      line-height: 1.58;
+    }
+
+    .signals {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: clamp(42px, 8vw, 100px);
+      align-items: start;
+    }
+
+    .signal-list {
+      border-top: 1px solid var(--line);
+    }
+
+    .signal {
+      padding: 26px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .signal h3 {
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+      font-weight: 620;
+    }
+
+    .signal p {
+      margin-bottom: 0;
+      color: var(--muted);
+      line-height: 1.58;
+    }
+
+    .not-counted {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 30px;
+      background: var(--surface);
+    }
+
+    .not-counted ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #c4c8c2;
+      line-height: 1.75;
+    }
+
+    .levels {
+      display: grid;
+      gap: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .level {
+      display: grid;
+      grid-template-columns: 90px 180px 1fr;
+      gap: 26px;
+      align-items: baseline;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .level-number {
+      color: var(--accent);
+      font-size: 1.2rem;
+      font-weight: 720;
+    }
+
+    .level-name {
+      font-size: 1.08rem;
+      font-weight: 650;
+    }
+
+    .level p {
+      margin-bottom: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .output-card {
+      border: 1px solid #353b35;
+      border-radius: 18px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .output-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 22px 28px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.76rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .output-body {
+      display: grid;
+      grid-template-columns: 0.7fr 1.3fr;
+    }
+
+    .verdict {
+      padding: 36px;
+      border-right: 1px solid var(--line);
+    }
+
+    .verdict strong {
+      display: block;
+      margin-bottom: 14px;
+      color: var(--accent);
+      font-size: clamp(2rem, 5vw, 4rem);
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+
+    .verdict span {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .evidence {
+      padding: 36px;
+    }
+
+    .evidence-item + .evidence-item {
+      margin-top: 22px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+    }
+
+    .evidence-item small {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--accent);
+      font-size: 0.7rem;
+      font-weight: 720;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .evidence-item p {
+      margin-bottom: 0;
+      color: #c6cac4;
+      line-height: 1.55;
+    }
+
+    .install-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .install-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 28px;
+      background: var(--surface);
+    }
+
+    .install-card h3 {
+      margin-bottom: 12px;
+      font-size: 1.25rem;
+    }
+
+    .install-card p {
+      color: var(--muted);
+      line-height: 1.58;
+    }
+
+    code {
+      color: var(--accent);
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .method-note {
+      max-width: 760px;
+      margin-top: 34px;
+      color: var(--faint);
+      font-size: 0.8rem;
+      line-height: 1.65;
+    }
+
+    footer {
+      padding: 34px 0 46px;
+      border-top: 1px solid var(--line);
+    }
+
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      color: var(--faint);
+      font-size: 0.75rem;
+    }
+
+    .footer-row a:hover {
+      color: var(--text);
+    }
+
+    @media (max-width: 820px) {
+      .hero,
+      .signals {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: auto;
+      }
+
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .step {
+        min-height: auto;
+      }
+
+      .step-number {
+        margin-bottom: 28px;
+      }
+
+      .output-body {
+        grid-template-columns: 1fr;
+      }
+
+      .verdict {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+    }
+
+    @media (max-width: 620px) {
+      .wrap {
+        width: min(calc(100% - 28px), var(--max));
+      }
+
+      .nav-links a:not(:last-child) {
+        display: none;
+      }
+
+      .hero,
+      .section {
+        padding: 72px 0;
+      }
+
+      h1 {
+        font-size: 3.45rem;
+      }
+
+      .level {
+        grid-template-columns: 46px 1fr;
+        gap: 16px;
+      }
+
+      .level p {
+        grid-column: 2;
+      }
+
+      .install-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-row {
+        display: block;
+      }
+
+      .footer-row span {
+        display: block;
+        margin-bottom: 8px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      * {
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap nav">
+    <div class="brand">Assess Agentic Expertise</div>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="#method">Method</a>
+      <a href="#levels">Levels</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/ulrich-e-r-djidonou/agentic-expertise-classifier">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="wrap hero">
+      <div>
+        <p class="eyebrow">Anthropic-aligned conversation assessment</p>
+        <h1>Let the conversation show your level.</h1>
+        <p class="hero-copy">
+          Invoke the skill after working with an agent. It evaluates the expertise you demonstrated
+          in the current task, cites the evidence it used, and returns one of Anthropic's five levels
+          or <em>Unclear</em> when no signal exists.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="#install">Get the skill</a>
+          <a class="button" href="https://www.anthropic.com/research/claude-code-expertise">Read the Anthropic report</a>
+        </div>
+      </div>
+
+      <aside class="prompt-panel" aria-label="Skill invocation example">
+        <p class="panel-label">Invoke at any point</p>
+        <p class="prompt" id="promptText">Use $assess-agentic-expertise to classify my task-specific expertise from this conversation.</p>
+        <div class="copy-row">
+          <button class="copy-button" id="copyButton" type="button">Copy prompt</button>
+          <span class="copy-status" id="copyStatus" role="status" aria-live="polite"></span>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section" id="method">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">How it works</p>
+          <h2>No questionnaire. Only observed behavior.</h2>
+          <p class="section-intro">
+            The primary verdict uses the current conversation and the task at hand. Memory, when available,
+            can add historical context but cannot change the session-level classification.
+          </p>
+        </div>
+
+        <div class="steps">
+          <article class="step">
+            <span class="step-number">01</span>
+            <h3>Work normally</h3>
+            <p>Direct the agent on a real task. The skill does not need a special test or self-reported answers.</p>
+          </article>
+          <article class="step">
+            <span class="step-number">02</span>
+            <h3>Invoke the skill</h3>
+            <p>Ask for the assessment once the conversation contains enough framing, verification, or correction behavior.</p>
+          </article>
+          <article class="step">
+            <span class="step-number">03</span>
+            <h3>Inspect the evidence</h3>
+            <p>Review the exact behaviors used, contrary evidence, data sufficiency, and one practical next step.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap signals">
+        <div>
+          <p class="eyebrow">Three co-equal signals</p>
+          <h2>What the classifier actually looks for.</h2>
+        </div>
+        <div>
+          <div class="signal-list">
+            <article class="signal">
+              <h3>Setup specificity</h3>
+              <p>Domain terms, non-obvious constraints, invariants, edge cases, conventions, and known failure modes.</p>
+            </article>
+            <article class="signal">
+              <h3>Verification type</h3>
+              <p>Targeted checks that reveal the user knows what could fail, rather than generic requests to double-check.</p>
+            </article>
+            <article class="signal">
+              <h3>Direction of correction</h3>
+              <p>Whether the user catches the agent's domain mistakes, or the agent must correct the user's mental model.</p>
+            </article>
+          </div>
+          <aside class="not-counted">
+            <p class="panel-label">Not counted as expertise by itself</p>
+            <ul>
+              <li>Job title or career seniority</li>
+              <li>Fluent or confident writing</li>
+              <li>Visible file names and paths</li>
+              <li>Generic requests to verify work</li>
+              <li>The difficulty of the task</li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="levels">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Anthropic's scale</p>
+          <h2>Task-specific, not person-wide.</h2>
+          <p class="section-intro">
+            A person can be expert in one task and beginner in another. The skill selects the closest holistic level,
+            without averaging numerical sub-scores.
+          </p>
+        </div>
+
+        <div class="levels">
+          <div class="level">
+            <span class="level-number">1</span>
+            <span class="level-name">Novice</span>
+            <p>Generic framing, no targeted verification, and basic domain concepts supplied by the agent.</p>
+          </div>
+          <div class="level">
+            <span class="level-number">2</span>
+            <span class="level-name">Beginner</span>
+            <p>Some correct terminology and obvious error detection, but important constraints and mental models remain incomplete.</p>
+          </div>
+          <div class="level">
+            <span class="level-number">3</span>
+            <span class="level-name">Intermediate</span>
+            <p>Operationally precise direction with some targeted checks, but limited engagement with methodology and tradeoffs.</p>
+          </div>
+          <div class="level">
+            <span class="level-number">4</span>
+            <span class="level-name">Advanced</span>
+            <p>Non-obvious domain constraints, specific verification, and successful redirection of at least one wrong approach.</p>
+          </div>
+          <div class="level">
+            <span class="level-number">5</span>
+            <span class="level-name">Expert</span>
+            <p>Practitioner-level framing, tradeoffs, surgical checks, technically grounded correction, or targeted failure tests.</p>
+          </div>
+          <div class="level">
+            <span class="level-number">?</span>
+            <span class="level-name">Unclear</span>
+            <p>Reserved for conversations with no substantive signal of expertise. Sparse but meaningful framing still receives a level.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Example output</p>
+          <h2>A verdict you can audit.</h2>
+        </div>
+
+        <article class="output-card">
+          <div class="output-top">
+            <span>Task: Econometric model validation</span>
+            <span>Evidence: sufficient</span>
+          </div>
+          <div class="output-body">
+            <div class="verdict">
+              <strong>4 - Advanced</strong>
+              <span>Primary verdict based only on the current conversation.</span>
+            </div>
+            <div class="evidence">
+              <div class="evidence-item">
+                <small>Setup specificity, raises verdict</small>
+                <p>The user specified the expected coefficient signs, significance conditions, and the exact interpretation required for the model.</p>
+              </div>
+              <div class="evidence-item">
+                <small>Verification type, raises verdict</small>
+                <p>The user requested checks aimed at a known failure mode rather than asking for a generic review.</p>
+              </div>
+              <div class="evidence-item">
+                <small>Limiting evidence</small>
+                <p>No observed correction of a subtle domain error, so the conversation does not support an Expert classification.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="install">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Install</p>
+          <h2>One skill folder. No backend.</h2>
+          <p class="section-intro">
+            Download the repository and place <code>skill/assess-agentic-expertise</code>
+            in the skills directory used by your agentic coding tool.
+          </p>
+        </div>
+
+        <div class="install-grid">
+          <article class="install-card">
+            <h3>Codex</h3>
+            <p>Copy the skill folder into <code>~/.codex/skills/</code>, then invoke <code>$assess-agentic-expertise</code> in a conversation.</p>
+            <a class="button primary" href="https://github.com/ulrich-e-r-djidonou/agentic-expertise-classifier">Open repository</a>
+          </article>
+          <article class="install-card">
+            <h3>Other skill-compatible agents</h3>
+            <p>Use the same <code>SKILL.md</code> and bundled reference in the tool's supported personal or project skills directory.</p>
+            <a class="button" href="https://github.com/ulrich-e-r-djidonou/agentic-expertise-classifier/tree/main/skill/assess-agentic-expertise">View skill files</a>
+          </article>
+        </div>
+
+        <p class="method-note">
+          This project is an independent implementation of the expertise classifier documented in Anthropic's
+          "Agentic coding and persistent returns to expertise", published June 16, 2026. It is not produced,
+          endorsed, or validated by Anthropic. Historical memory context and practical recommendations are
+          clearly separated adaptations and are not part of Anthropic's published classifier output.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-row">
+      <span>Assess Agentic Expertise</span>
+      <span>
+        <a href="https://www.anthropic.com/research/claude-code-expertise">Report</a>
+        ·
+        <a href="https://cdn.sanity.io/files/4zrzovbb/website/ef87578c3828dc79d711f6d9c52eff39ac4e3be0.pdf">Appendix</a>
+      </span>
+    </div>
+  </footer>
+
+  <script>
+    const copyButton = document.getElementById("copyButton");
+    const copyStatus = document.getElementById("copyStatus");
+    const promptText = document.getElementById("promptText").textContent;
+
+    function fallbackCopy(text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      const copied = document.execCommand("copy");
+      textarea.remove();
+      return copied;
+    }
+
+    copyButton.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(promptText);
+        copyStatus.textContent = "Copied";
+      } catch {
+        copyStatus.textContent = fallbackCopy(promptText) ? "Copied" : "Select and copy the prompt";
+      }
+    });
+  </script>
+</body>
+</html>
