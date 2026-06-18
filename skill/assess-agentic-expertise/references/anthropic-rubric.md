@@ -12,6 +12,8 @@ This file summarizes the published classifier. Consult the official appendix whe
 
 Classify apparent expertise exhibited in the specific domain and task of the session. Do not classify general ability, profession, task difficulty, or agent performance.
 
+Return one classification for the session's primary task. Do not create a multi-domain profile in the primary assessment.
+
 ## Co-equal signals
 
 ### Setup specificity
@@ -71,4 +73,3 @@ The following are useful additions but are not outputs of Anthropic's published 
 - practical improvement advice.
 
 Keep these additions visibly separate from the primary classification.
-

@@ -68,4 +68,4 @@ If memory or prior-session evidence is accessible, it can appear only as a separ
 
 Status: accepted
 
-Classify expertise for the task at hand, not for the person globally. If multiple domains are present, classify them separately only when each has sufficient evidence.
+Classify expertise for the primary task of the session, not for the person globally. Each invocation returns one verdict. If multiple domains appear, choose the one that best represents the session's main goal and mention the others only as a scope limitation.

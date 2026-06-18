@@ -15,7 +15,7 @@ Read [references/anthropic-rubric.md](references/anthropic-rubric.md) before cla
 2. Evaluate only expertise exhibited in that task, not career, title, intelligence, writing fluency, task difficulty, or the agent's performance.
 3. Use the current conversation as the sole basis for the primary verdict.
 4. If memory or prior-session evidence is available, use it only for a separate historical context section. Never let it change the current-session verdict.
-5. If several materially different domains appear, classify each domain separately only when each has enough evidence. Otherwise classify the dominant task and mark the others unevaluated.
+5. Return one verdict for the primary task of the session. If several tasks or domains appear, identify the task that best represents the session's main goal and classify only that task. Mention other domains only as a scope limitation, without assigning additional levels.
 
 ## Evidence
 
@@ -41,7 +41,7 @@ Include contrary evidence. Do not count these as expertise:
 
 ## Classification
 
-Return exactly one primary label for each evaluated task:
+Return exactly one primary label for the session's primary task:
 
 - `1 - Novice`
 - `2 - Beginner`
@@ -89,4 +89,3 @@ Independent application of Anthropic's task-specific expertise classifier from "
 ```
 
 Keep the explanation concise. Do not reveal hidden reasoning or private chain-of-thought. Report only observable evidence and a short rationale.
-

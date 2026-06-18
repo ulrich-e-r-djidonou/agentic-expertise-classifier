@@ -44,3 +44,9 @@ Validate the skill structure, test the website on desktop and mobile, commit, pu
 - Mobile page reviewed at 390 x 844.
 - No horizontal overflow or browser console errors detected.
 - Copy-prompt behavior tested, including the fallback used when the Clipboard API is unavailable.
+
+### Anthropic fidelity correction
+
+- Restricted each invocation to one primary task and one verdict.
+- Removed the option to produce concurrent domain classifications from a single session.
+- Other observed domains may be mentioned only as scope limitations.
